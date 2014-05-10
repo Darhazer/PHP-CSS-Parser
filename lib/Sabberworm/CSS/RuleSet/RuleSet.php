@@ -18,10 +18,10 @@ abstract class RuleSet {
 
 	public function addRule(Rule $oRule) {
 		$sRule = $oRule->getRule();
-		if(!isset($this->aRules[$sRule])) {
-			$this->aRules[$sRule] = array();
+		if(isset($this->aRules[$sRule])) {
+			unset($this->aRules[$sRule]);
 		}
-		$this->aRules[$sRule][] = $oRule;
+		$this->aRules[$sRule] = $oRule;
 	}
 
 	/**
@@ -38,7 +38,7 @@ abstract class RuleSet {
 		foreach($this->aRules as $sName => $aRules) {
 			// Either no search rule is given or the search rule matches the found rule exactly or the search rule ends in “-” and the found rule starts with the search rule.
 			if(!$mRule || $sName === $mRule || (strrpos($mRule, '-') === strlen($mRule) - strlen('-') && (strpos($sName, $mRule) === 0 || $sName === substr($mRule, 0, -1)))) {
-				$aResult = array_merge($aResult, $aRules);
+				$aResult = array_merge($aResult, array($aRules));
 			}
 		}
 		return $aResult;
@@ -64,14 +64,7 @@ abstract class RuleSet {
 	public function removeRule($mRule) {
 		if($mRule instanceof Rule) {
 			$sRule = $mRule->getRule();
-			if(!isset($this->aRules[$sRule])) {
-				return;
-			}
-			foreach($this->aRules[$sRule] as $iKey => $oRule) {
-				if($oRule === $mRule) {
-					unset($this->aRules[$sRule][$iKey]);
-				}
-			}
+			unset($this->aRules[$sRule]);
 		} else {
 			foreach($this->aRules as $sName => $aRules) {
 				// Either no search rule is given or the search rule matches the found rule exactly or the search rule ends in “-” and the found rule starts with the search rule or equals it (without the trailing dash).
@@ -85,11 +78,8 @@ abstract class RuleSet {
 	public function __toString() {
 		$sResult = '';
 		foreach ($this->aRules as $aRules) {
-			foreach($aRules as $oRule) {
-				$sResult .= $oRule->__toString();
-			}
+		    $sResult .= $aRules->__toString();
 		}
 		return $sResult;
 	}
-
 }
